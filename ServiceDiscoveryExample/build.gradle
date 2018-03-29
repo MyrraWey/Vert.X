@@ -1,0 +1,40 @@
+apply plugin: 'java'
+
+ext {
+    vertx_version = "3.5.1"
+}
+
+sourceSets {
+    generated {
+        java.srcDir "${projectDir}/src/main/generated"
+    }
+}
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile "io.vertx:vertx-core:$vertx_version"
+    compile "io.vertx:vertx-hazelcast:$vertx_version"
+    compile "io.vertx:vertx-service-discovery:$vertx_version"
+    compile "io.vertx:vertx-service-proxy:$vertx_version"
+    compile "io.vertx:vertx-codegen:$vertx_version"
+    compile "io.vertx:vertx-service-proxy:$vertx_version"
+}
+
+task generateProxies(type: JavaCompile, group: 'build', description: 'Generates the Vertx proxies') {
+    source = sourceSets.main.java // input source set
+    classpath = configurations.compile //+ configurations.vertx // add processor module to classpath
+    // specify javac arguments
+    options.compilerArgs = [
+            "-proc:only",
+            "-processor", "io.vertx.codegen.CodeGenProcessor", // vertx processor here
+            "-AoutputDirectory=${projectDir}/src/main"
+    ]
+    // specify output of generated code
+    destinationDir = file("${projectDir}/src/main/generated")
+}
+//TODO execute 'generateProxies' before 'build' with gradle
